@@ -1,7 +1,7 @@
 /** @format */
 
-import { RentSpace } from "@domain/models/rent-space.model";
-import { HttpService } from "@http-services";
+import type { RentSpace } from "@domain/models/rent-space.model";
+import { HttpService } from "@http-services/http.service";
 
 const http = new HttpService({}, true);
 

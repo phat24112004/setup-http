@@ -1,6 +1,7 @@
 /** @format */
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { RentSpace } from "./models/rent-space.model";
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { RentSpace } from "@domain/models/rent-space.model";
 
 interface RentSpaceState {
   items: RentSpace[];

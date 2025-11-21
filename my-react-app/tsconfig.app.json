@@ -19,7 +19,7 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
@@ -31,5 +31,5 @@
       "@custom-hook/*": ["custom-hook/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "domain", "http-services", "custom-hook"]
 }

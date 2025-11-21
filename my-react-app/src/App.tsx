@@ -1,34 +1,33 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import "./App.css";
+/** @format */
+import React, { useEffect } from "react";
+import { useAppDispatch } from "@domain/hooks";
+import { increment } from "@domain/counterSlice";
+import { setRentSpaces } from "@domain/reducer";
+import { API_BASE_URL } from "@http-services/url.constant";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    console.log("🔍 Đang gọi API:", API_BASE_URL); // log URL để chắc chắn
+    fetch(API_BASE_URL)
+      .then((res) => {
+        console.log("📡 Status:", res.status); // ✅ log status code
+        return res.json();
+      })
+      .then((data) => {
+        dispatch(setRentSpaces(data));
+        console.log("📦 Danh sách từ MockAPI:", data); // ✅ log ra console
+      })
+      .catch((err) => {
+        console.error("❌ Lỗi khi gọi API:", err);
+      });
+  }, [dispatch]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noopener noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noopener noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <button onClick={() => dispatch(increment())}>Ấn vào tôi</button>
+    </div>
   );
 }
 

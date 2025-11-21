@@ -1,14 +1,14 @@
 /** @format */
-
 import { configureStore } from "@reduxjs/toolkit";
-import rootReducer from "./reducer";
+import rentSpaceReducer from "./reducer";
+import counterReducer from "./counterSlice";
 
-// Tạo store chính
-export const RootStore = configureStore({
-  reducer: rootReducer,
+export const store = configureStore({
+  reducer: {
+    rentSpace: rentSpaceReducer,
+    counter: counterReducer,
+  },
 });
 
-// Kiểu dữ liệu của state và dispatch
-export type RootState = ReturnType<typeof RootStore.getState>;
-export type AppDispatch = typeof RootStore.dispatch;
-  
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

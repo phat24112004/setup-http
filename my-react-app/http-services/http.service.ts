@@ -1,6 +1,7 @@
 /** @format */
 
-import axios, {
+import axios, { AxiosHeaders } from "axios";
+import type {
   AxiosError,
   AxiosInstance,
   AxiosRequestConfig,
@@ -33,18 +34,53 @@ export enum HttpServiceError {
 export class HttpService {
   private client: AxiosInstance;
 
-  private responseHandler = (response: AxiosResponse): HttpResult<any> => {
+  constructor(
+    headers: Record<string, string> = { "Accept-Language": "vi" },
+    skipToken: boolean = true,
+    baseUrl: string = API_BASE_URL
+  ) {
+    this.client = axios.create({
+      headers,
+      baseURL: baseUrl,
+    });
+
+    // Interceptor chỉ giữ nguyên AxiosResponse/AxiosError
+    this.client.interceptors.response.use(
+      (response) => response,
+      (error) => Promise.reject(error)
+    );
+
+    if (!skipToken) {
+      this.client.interceptors.request.use((config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+          // Dùng AxiosHeaders.from để đảm bảo đúng kiểu AxiosRequestHeaders
+          const current =
+            config.headers instanceof AxiosHeaders
+              ? config.headers
+              : AxiosHeaders.from(config.headers ?? {});
+          config.headers = AxiosHeaders.from({
+            ...current.toJSON(),
+            Authorization: AUTHORIZATION_BEARER + token,
+          });
+        }
+        return config;
+      });
+    }
+  }
+
+  private responseHandler<T>(response: AxiosResponse<T>): HttpResult<T> {
     return {
       isSuccess: response.status < 300,
       status: response.status,
       statusText: response.statusText,
       headers: response.headers,
-      data: response.data || null,
+      data: response.data,
       config: response.config,
     };
-  };
+  }
 
-  private errorHandler = (error: AxiosError): HttpResult<null> => {
+  private errorHandler<T>(error: AxiosError): HttpResult<T | null> {
     if (error.response) {
       return {
         isSuccess: false,
@@ -72,69 +108,68 @@ export class HttpService {
       data: null,
       config: {},
     };
-  };
+  }
 
-  constructor(
-    headers: Record<string, string> = { "Accept-Language": "vi" },
-    skipToken: boolean = true,
-    baseUrl: string = API_BASE_URL
-  ) {
-    this.client = axios.create({
-      headers,
-      baseURL: baseUrl,
-    });
-
-    this.client.interceptors.response.use(
-      this.responseHandler,
-      this.errorHandler
-    );
-
-    if (!skipToken) {
-      this.client.interceptors.request.use((config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-          config.headers.Authorization = AUTHORIZATION_BEARER + token;
-        }
-        return config;
-      });
+  async get<T>(
+    url: string,
+    configs?: AxiosRequestConfig
+  ): Promise<HttpResult<T | null>> {
+    try {
+      const response = await this.client.get<T>(url, configs);
+      return this.responseHandler(response);
+    } catch (err) {
+      return this.errorHandler<T>(err as AxiosError);
     }
   }
 
-  get<T>(url: string, configs?: AxiosRequestConfig): Promise<HttpResult<T>> {
-    return this.client.get(url, configs) as Promise<HttpResult<T>>;
-  }
-
-  post<TData, TResponse>(
+  async post<TData, TResponse>(
     url: string,
     data: TData,
     configs?: AxiosRequestConfig
-  ): Promise<HttpResult<TResponse>> {
-    return this.client.post(url, data, configs) as Promise<
-      HttpResult<TResponse>
-    >;
+  ): Promise<HttpResult<TResponse | null>> {
+    try {
+      const response = await this.client.post<TResponse>(url, data, configs);
+      return this.responseHandler(response);
+    } catch (err) {
+      return this.errorHandler<TResponse>(err as AxiosError);
+    }
   }
 
-  put<TData, TResponse>(
+  async put<TData, TResponse>(
     url: string,
     data: TData,
     configs?: AxiosRequestConfig
-  ): Promise<HttpResult<TResponse>> {
-    return this.client.put(url, data, configs) as Promise<
-      HttpResult<TResponse>
-    >;
+  ): Promise<HttpResult<TResponse | null>> {
+    try {
+      const response = await this.client.put<TResponse>(url, data, configs);
+      return this.responseHandler(response);
+    } catch (err) {
+      return this.errorHandler<TResponse>(err as AxiosError);
+    }
   }
 
-  patch<TData, TResponse>(
+  async patch<TData, TResponse>(
     url: string,
     data: TData,
     configs?: AxiosRequestConfig
-  ): Promise<HttpResult<TResponse>> {
-    return this.client.patch(url, data, configs) as Promise<
-      HttpResult<TResponse>
-    >;
+  ): Promise<HttpResult<TResponse | null>> {
+    try {
+      const response = await this.client.patch<TResponse>(url, data, configs);
+      return this.responseHandler(response);
+    } catch (err) {
+      return this.errorHandler<TResponse>(err as AxiosError);
+    }
   }
 
-  delete<T>(url: string, configs?: AxiosRequestConfig): Promise<HttpResult<T>> {
-    return this.client.delete(url, configs) as Promise<HttpResult<T>>;
+  async delete<T>(
+    url: string,
+    configs?: AxiosRequestConfig
+  ): Promise<HttpResult<T | null>> {
+    try {
+      const response = await this.client.delete<T>(url, configs);
+      return this.responseHandler(response);
+    } catch (err) {
+      return this.errorHandler<T>(err as AxiosError);
+    }
   }
 }
