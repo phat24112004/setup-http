@@ -1,13 +1,10 @@
-/** @format */
 import { createSlice } from "@reduxjs/toolkit";
 
 interface CounterState {
   value: number;
 }
 
-const initialState: CounterState = {
-  value: 0,
-};
+const initialState: CounterState = { value: 0 };
 
 const counterSlice = createSlice({
   name: "counter",
@@ -15,10 +12,10 @@ const counterSlice = createSlice({
   reducers: {
     increment(state) {
       state.value += 1;
-      console.log("✅ Đã ấn nút, giá trị hiện tại:", state.value); // ✅ log ra console
     },
   },
 });
 
 export const { increment } = counterSlice.actions;
 export default counterSlice.reducer;
+//Đây là Redux slice quản lý state counter
